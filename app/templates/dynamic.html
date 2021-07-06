@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ user.username }} 的动态 {{ dynamic.dynamic_id }}
+{% endblock %}
+
+{% block content %}
+    <h2>{{ user.username }}</h2>
+    <p>ID: {{ user.user_id }}</p>
+    <h2>动态内容</h2>
+    <p>{{ dynamic.description }}</p>
+    <p>时间: {{ dynamic.time }}</p>
+    <p>评论总数：{{ run_record.total }} 存活总数：{{ reply.total }}</p>
+    <h2>评论</h2>
+    {% include "reply_inner.html" %}
+{% endblock %}

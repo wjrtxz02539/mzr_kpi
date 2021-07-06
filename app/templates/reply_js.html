@@ -1,0 +1,44 @@
+<script type="text/javascript">
+    $(function () {
+        showList();
+    });
+
+    //动态显示内容
+    function showList() {
+        $("#reply_list").empty();//显示前 清空原列表
+        var size = $("#reply_size")[0].value;
+        var start = $("#reply_start")[0].value;
+        $.ajax({
+            "url": "/api/reply",
+            "data": {
+                "thread_id": {{ dynamic.thread_id }}, "size": size, "start": start,
+                "order_by": "-time"
+            },
+            "type": "get",
+            "dataType": "json",
+            "success": function (resp) {
+                $('#reply_total').text(resp.pagination.total);
+                for (var reply of resp.data) {
+                    var li = '<li>#{content}' +
+                        '<ul>' +
+                        '<li>#{time} <a href="/user/#{up.user_id}">#{up.username}</a> <a href="/dynamic/thread/#{thread_id}">原动态</a></li>' +
+                        '</ul>' +
+                        '</li>';
+                    li = li.replace("#{time}", reply.time);
+                    li = li.replace("#{up.user_id}", reply.up.user_id);
+                    li = li.replace("#{content}", reply.content);
+                    li = li.replace("#{up.username}", reply.up.username);
+                    li = li.replace("#{thread_id}", reply.thread_id);
+                    $("#reply_list").append(li);
+                }
+            }
+        });
+    }
+
+</script>
+总共 <label id="reply_total"></label> 条评论
+分页起始：<input id="reply_start" value="0"/>
+每页数量：<input id="reply_size" value="20"/>
+<button onclick="showList()">查询</button>
+<ol id="reply_list">
+</ol>

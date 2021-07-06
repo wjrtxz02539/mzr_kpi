@@ -1,0 +1,91 @@
+<div class="container-lg">
+    <div class="row row-cols-4" id="reply_list">
+    </div>
+</div>
+<nav aria-label="Reply Nav">
+    <ul class="pagination" id="reply_nav">
+    </ul>
+</nav>
+<style>
+    .row > .col, .row > [class^="col-"] {
+        padding-top: .75rem;
+        padding-bottom: .75rem;
+        background-color: rgba(39, 41, 43, 0.03);
+        border: 1px solid rgba(39, 41, 43, 0.1);
+    }
+</style>
+<script>
+    var pagination_params = {{ pagination_params|safe }};
+    $(function () {
+        pagination("{{ pagination_url }}", 0, 20, '-time');
+    });
+
+    function pagination(url, start, size, order_by) {
+        let reply_list = $('#reply_list');
+        reply_list.empty();
+        let nav = $('#reply_nav');
+        nav.empty();
+        let base_params = {'start': start, 'size': size, 'order_by': order_by}
+        $.ajax({
+            url: url,
+            method: 'get',
+            data: Object.assign({}, base_params, pagination_params),
+            dataType: "json",
+            success: (function (resp) {
+                let total = resp.pagination.total;
+                let size = resp.pagination.size;
+                let start = resp.pagination.start;
+                $('#reply_total').text(total);
+                for (var reply of resp.data) {
+                    let div = '<div class="col-12">#{content}</div>' +
+                        '<div class="col-2">赞：#{like}</div>' +
+                        '<div class="col-2">楼层：#{floor}</div>' +
+                        '<div class="col-2"><a href="/dynamic/thread/#{thread_id}">原动态</a></div>' +
+                        '<div class="col"><a href="/user/#{user_id}">#{username}</a></div>' +
+                        '<div class="col">时间：#{time}</div>';
+                    div = div.replace('#{content}', reply.content);
+                    div = div.replace('#{like}', reply.like);
+                    div = div.replace('#{floor}', reply.floor);
+                    div = div.replace('#{thread_id}', reply.thread_id);
+                    div = div.replace('#{user_id}', reply.user_id);
+                    div = div.replace('#{username}', reply.user.username);
+                    div = div.replace('#{time}', reply.time);
+                    reply_list.append(div);
+                }
+
+                let current_page = (start / size) + 1;
+                if (current_page === 1) {
+                    nav.append('<li class="page-item disabled"><a class="page-link" href="#">上一页</a></li>');
+                } else {
+                    let temp = '<li class="page-item"><a class="page-link" onclick="pagination(\'#{url}\', #{start}, #{size}, \'#{order_by}\')">上一页</a></li>';
+                    temp = temp.replace('#{url}', url);
+                    temp = temp.replace('#{start}', size * (current_page - 2));
+                    temp = temp.replace('#{size}', size);
+                    temp = temp.replace('#{order_by}', order_by);
+                    nav.append(temp);
+                }
+                for (const index of Array(4).keys()) {
+                    let temp = '';
+                    if (index === 0) {
+                        temp = '<li class="page-item disabled"><a class="page-link" onclick="pagination(\'#{url}\', #{start}, #{size}, \'#{order_by}\')">#{page}</a></li>';
+                    } else {
+                        temp = '<li class="page-item"><a class="page-link" onclick="pagination(\'#{url}\', #{start}, #{size}, \'#{order_by}\')">#{page}</a></li>';
+                    }
+                    let page = current_page + index;
+                    temp = temp.replace('#{url}', url);
+                    temp = temp.replace('#{page}', page);
+                    temp = temp.replace('#{start}', size * (page - 1));
+                    temp = temp.replace('#{size}', size);
+                    temp = temp.replace('#{order_by}', order_by);
+                    nav.append(temp);
+                }
+                let temp = '<li class="page-item"><a class="page-link" onclick="pagination(\'#{url}\', #{start}, #{size}, \'#{order_by}\')">下一页</a></li>';
+                temp = temp.replace('#{url}', url);
+                temp = temp.replace('#{start}', size * (current_page));
+                temp = temp.replace('#{size}', size);
+                temp = temp.replace('#{order_by}', order_by);
+                nav.append(temp);
+            })
+        })
+    }
+</script>

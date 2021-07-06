@@ -1,0 +1,34 @@
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <style>body {
+        color: black;
+    }
+    </style>
+</head>
+<h1>快捷查询</h1>
+用户ID：<input name="user_id" id="input.user_id" type="text"/>
+<button type="button" onclick="window.location.href='/user/'+document.getElementById('input.user_id').value">查询</button>
+<br>
+动态ID：<input name="user_id" id="input.dynamic_id" type="text"/>
+<button type="button" onclick="window.location.href='/user/'+document.getElementById('input.dynamic_id').value">查询
+</button>
+<h1>当前爬取UP主</h1>
+<table border="1">
+    <thead>
+    <tr>
+        <th>UP</th>
+        <th>动态数量</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for data in show_list %}
+        <tr>
+            <td><a href="/dynamic/user/{{ data.user.user_id }}">{{ data.user.username }}</a></td>
+            <td>{{ data.dynamic_total }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<p>当前可用代理数量：{{ proxy_count }}</p>
+<a href="https://github.com/wjrtxz02539/mzr_kpi/blob/master/API.md">API 文档</a>
+</html>

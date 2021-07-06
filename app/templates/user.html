@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ user.username }}
+{% endblock %}
+
+{% block content %}
+    <h2>{{ user.username }}</h2>
+    <a href="https://space.bilibili.com/{{ user.user_id }}">个人空间</a>
+    <h3>粉丝牌</h3>
+    <ul>
+        {% for sailing in user.sailings %}
+            <li>{{ sailing.name }}</li>
+        {% endfor %}
+    </ul>
+    <h3>挂件</h3>
+    <ul>
+        {% for pendant in user.pendants %}
+            <li>{{ pendant }}</li>
+        {% endfor %}
+    </ul>
+
+    <h3>数据</h3>
+    <ul>
+        <li>
+            动态数量：<a href="/dynamic/user/{{ user.user_id }}">{{ dynamic_total }}</a>
+        </li>
+        <li>
+            评论数量：{{ reply_total }}
+        </li>
+    </ul>
+    {% include "reply_inner.html" %}
+{% endblock %}

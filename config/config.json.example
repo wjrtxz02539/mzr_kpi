@@ -1,0 +1,11 @@
+{
+    "dynamic_thread": 6,
+    "reply_thread": 10,
+    "proxy_pool_url": "192.168.1.1:5010/",
+    "mongodb_url": "mongodb://192.168.1.1:27017/?serverSelectionTimeoutMS=5000&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-256",
+    "bili_user_id": "256667467",
+    "force": false,
+    "skip": 0,
+    "last_days": 7,
+    "depth": null
+}
