@@ -36,6 +36,8 @@ class ProxyPool:
 
     @classmethod
     def count(cls, https: bool = False) -> int:
+        if Control.proxy_pool_url is None:
+            return 0
         res = requests.get(urljoin(Control.proxy_pool_url, '/count/')).json()
         if https:
             return res.get('count').get('https', 0)
