@@ -38,7 +38,7 @@ def dynamic_from_thread(thread_id: str):
 
 @web.route('/dynamic/user/<string:user_id>')
 def dynamic_from_user(user_id: str):
-    size = int(request.args.get('size', 1000))
+    size = int(request.args.get('size', 20))
     start = int(request.args.get('start', 0))
     order_by = request.args.get('order_by', '-time')
 

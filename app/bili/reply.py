@@ -78,6 +78,7 @@ class BiliReply(Document):
     up = EmbeddedDocumentField(BiliReplyMiniUserEmbedded, required=True)
     content = StringField(required=True)
     device = StringField(default='')
+    plat = IntField()  # 1=Web, 2=Android, 3=iOS
     replies_count = IntField()
     has_folded = BooleanField()
     is_folded = BooleanField()
@@ -96,6 +97,7 @@ class BiliReply(Document):
         'user_id': fields.Integer,
         'content': fields.String,
         'device': fields.String,
+        'plat': fields.Integer,
         'replies_count': fields.Integer,
         'has_folded': fields.Boolean,
         'is_folded': fields.Boolean,
@@ -112,9 +114,7 @@ class BiliReply(Document):
             {
                 'fields': ['reply_id'],
                 'unique': True
-            },
-            'thread_id',
-            'up_id'
+            }
         ]
     }
 
@@ -163,7 +163,7 @@ class BiliReply(Document):
                            parent=reply_data['parent'], dialog=reply_data['dialog'],
                            time=datetime.fromtimestamp(reply_data['ctime']), like=reply_data['like'],
                            user_id=member['user_id'], content=reply_data['content']['message'],
-                           device=reply_data['content']['device'],
+                           device=reply_data['content']['device'], plat=reply_data['content']['plat'],
                            has_folded=reply_data['folder']['has_folded'],
                            is_folded=reply_data['folder']['is_folded'],
                            invisible=reply_data['invisible'])
@@ -185,7 +185,11 @@ class BiliReply(Document):
                     for item in replies:
                         cls.from_dict(thread_type=thread_type, reply_data=item, up=up)
             try:
-                cls._get_collection().replace_one({'reply_id': document.reply_id}, document.to_mongo(), upsert=True)
+                old = cls.objects(reply_id=document.reply_id).first()
+                if old is not None:
+                    old.update(like=document.like, replies_count=document.replies_count, plat=document.plat)
+                else:
+                    document.save()
             except Exception as err:
                 cls.logger.error(err)
             return document
