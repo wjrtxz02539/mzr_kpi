@@ -8,3 +8,6 @@ requests
 cachetools
 uwsgi
 schedule
+lxml
+openpyxl
+GitPython

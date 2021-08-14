@@ -300,6 +300,8 @@ class BiliDynamic(Document):
 
             try:
                 up = BiliUser.objects(user_id=self.user_id).first()
+                if up is None:
+                    up = BiliUser.from_user_id(self.user_id)
                 while not cursor['is_end']:
                     params = {'next': next_pos, **base_params}
                     res = get(logger, self.thread_url, params=params, headers=self.headers)

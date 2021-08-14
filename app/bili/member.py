@@ -2,6 +2,8 @@ from flask_restful import fields, marshal
 from mongoengine import Document, StringField, IntField, EmbeddedDocument, BooleanField, EmbeddedDocumentListField, \
     ListField
 from mongoengine.errors import NotUniqueError
+from .tools import get
+from ..logger import bili_logger
 
 
 class BiliUserSailingEmbedded(EmbeddedDocument):
@@ -35,6 +37,7 @@ class BiliUserSailingEmbedded(EmbeddedDocument):
 
 
 class BiliUser(Document):
+    logger = bili_logger.getChild('User')
     user_id = IntField(required=True)
     username = StringField(required=True)
     avatar = StringField()
@@ -70,6 +73,8 @@ class BiliUser(Document):
         ]
     }
 
+    account_url = 'https://api.bilibili.com/x/space/acc/info?mid={0}&jsonp=jsonp'
+
     @staticmethod
     def parse_sex(sex: str) -> int:
         if sex == '女':
@@ -103,6 +108,22 @@ class BiliUser(Document):
             data['pendants'].append(pendant)
 
         return data
+
+    @classmethod
+    def from_user_id(cls, user_id: int):
+        res = get(cls.logger, url=cls.account_url.format(user_id))
+        raw = res.json()
+        data = raw['data']
+        document = cls(user_id=user_id, username=data['name'], sex=cls.parse_sex(data['sex']), sign=data['sign'],
+                       level=data['level'], vip=data['vip']['type'], avatar=data['face'])
+        pendant = data['pendant']['name']
+        if len(pendant) > 0:
+            document.pendants = [pendant]
+        try:
+            return document.save()
+        except NotUniqueError:
+            document = cls.objects(user_id=user_id).first()
+            return document
 
     @classmethod
     def from_dict(cls, member_data: dict) -> 'BiliUser':
